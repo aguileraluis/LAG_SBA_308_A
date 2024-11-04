@@ -51,7 +51,7 @@ async function fetchPosts(baseUrl) {
       const updateButtonStyle = isAdmin ? '' : 'display: none'; 
 
       return `
-         <div id=${post.id} class="post">
+         <div id=${post._id} class="post">
         <img src=${post.imageUrl} alt="Image"/>
         <div class="post-title">
         ${
@@ -67,10 +67,10 @@ async function fetchPosts(baseUrl) {
       }
       
       <div id="admin-buttons">
-        <button class="btn" style="${deleteButtonStyle} onClick="deletePost('${post._id}', '${baseUrl}')">Delete</button>
-        <button class="btn" style="${deleteButtonStyle} onClick="showUpdateForm('${post._id}', '${post.title}', ${post.content}')">Update</button>
+        <button class="btn" style="${deleteButtonStyle} onclick="deletePost('${post._id}', '${baseUrl}')">Delete</button>
+        <button class="btn" style="${deleteButtonStyle} onclick="showUpdateForm('${post._id}', '${post.title}', ${post.content}')">Update</button>
       </div>
-      ${index === 0 ? '<hr/>' : ''} 
+      ${index === 0 ? '<hr>' : ''} 
       ${index === 0 ? '<h2>All Articles</h2>' : ''} 
     </div>
       `
@@ -211,9 +211,9 @@ async function updatePost(event, postId) {
 
 async function registerUser(event, baseUrl) {
   event.preventDefault(); 
-  const usernameInput = document.getElementById('register-username').value; 
-  const passwordInput = document.getElementById('register-password').value; 
-  const roleInput = document.getElementById('register-role').value; 
+  const usernameInput = document.getElementById('register-username'); 
+  const passwordInput = document.getElementById('register-password'); 
+  const roleInput = document.getElementById('register-role'); 
 
   const username = usernameInput.value; 
   const password = usernameInput.value; 
@@ -238,7 +238,7 @@ async function registerUser(event, baseUrl) {
       body: JSON.stringify(newUser)
     }); 
 
-    const data = await res.json(); 
+    const data = await res.json()
 
     if (data.success) {
       alert('Registered Successfully!'); 
