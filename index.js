@@ -1,225 +1,249 @@
-require('dotenv').config(); 
-const express = require('express'); 
-const cors = require('cors'); 
-const favicon = require('serve-favicon'); 
-const bodyParser = require('body-parser'); 
-const bcrypt = require('bcrypt'); 
-const jwt = require('jsonwebtoken'); 
-const path = require('path'); 
-const mongoose = require('mongoose'); 
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const favicon = require('serve-favicon');
+const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const path = require('path');
+const mongoose = require('mongoose');
 const validator = require('validator');
 const fs = require('fs');
 
-const jwtSecret = process.env.JWT_SECRET; 
-const app = express(); 
-const PORT = process.env.PORT || 5501; 
+const jwtSecret = 'super-secret-key-1234';
+const app = express();
+const PORT = process.env.PORT || 5500;
 
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico'))); 
+// Favicon
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
-const connectDB = async() => {
+// Connect to MongoDB
+const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true, 
-      useUnifiedTopology: true
+    const conn = await mongoose.connect('mongodb+srv://luis:gt9HYW8kE2sZ9Z3m@cluster0.ge5ew.mongodb.net/', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
-  } catch (error) {
-    console.log(error); 
-  }
-}
+  } catch (error) {}
+};
 
 connectDB().then(() => {
-  console.log(`Listening on port ${PORT}`); 
-})
+  app.listen(PORT, () => {
+    console.log(`Listening on port ${PORT}`);
+  });
+});
 
+// MongoDB Models
 const Post = mongoose.model(
-  'Post', 
+  'Post',
   new mongoose.Schema({
-    title: String, 
-    content: String, 
-    imageUrl: String, 
-    author: String, 
-    timestamp: String
+    title: String,
+    content: String,
+    imageUrl: String,
+    author: String,
+    timestamp: String,
   })
-)
+);
 
 const User = mongoose.model(
-  'User', 
+  'User',
   new mongoose.Schema({
-    username: String, 
-    password: String, 
-    role: String
+    username: String,
+    password: String,
+    role: String,
   })
-)
+);
 
-app.use(cors({ origin: '*' })); 
-app.use(bodyParser.json()); 
-app.use(express.static(path.join(__dirname))); 
+// Middleware
+app.use(cors({ origin: '*' }));
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname)));
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html')); 
-})
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
+// JWT Authentication Middleware
 const authenticateJWT = (req, res, next) => {
-  const token = req.headers.authorization.split(' ')[1]; 
+  const token = req.headers.authorization.split(' ')[1];
 
   if (token) {
     jwt.verify(token, jwtSecret, (err, user) => {
       if (err) {
-        console.log('JWT verification Error', err.message);
-        return res.sendStatus(404);  
+        console.error('JWT Verification Error', err.message);
+        return res.sendStatus(403);
       }
-      req.user = user; 
-      next(); 
-    }); 
+      req.user = user;
+      next();
+    });
   } else {
-    console.log('Token is missing'); 
-    res.sendStatus(404); 
+    console.error('Token is missing');
+    res.sendStatus(401);
   }
-}
+};
 
+// User registration
 app.post('/register', async (req, res) => {
   const { username, password, role } = req.body;
 
+  // Sanitze and validate user input
   const sanitizedUsername = validator.escape(username);
   const sanitizedPassword = validator.escape(password);
 
+  // Ensure valid input data
   if (!sanitizedUsername || !sanitizedPassword) {
-    return res.status(400).send({ error: 'Invalid input data' }); 
+    return res.status(400).send({ error: 'Invalid input data' });
   }
 
-  const hashedPassword = await bcrypt.hash(sanitizedPassword, 10); 
+  const hashedPassword = await bcrypt.hash(sanitizedPassword, 10);
+
   const newUser = new User({
     username: sanitizedUsername,
-    password: sanitizedPassword, 
-    role
-  }); 
+    password: hashedPassword,
+    role,
+  });
 
-  await newUser.save(); 
-  res.status(200).send({ success: true }); 
-}); 
+  await newUser.save();
+  res.status(201).send({ success: true });
+});
 
-app.post('/login', async(req, res) => {
-  const { username, password } = req.body; 
+// User login
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
 
+  // Sanitze and validate user input
   const sanitizedUsername = validator.escape(username);
   const sanitizedPassword = validator.escape(password);
 
+  // Ensure valid input data
   if (!sanitizedUsername || !sanitizedPassword) {
-    return res.status(400).send({ error: 'Invalid input data' }); 
+    return res.status(400).send({ error: 'Invalid input data' });
   }
 
-  const user = await User.findOne({ username: sanitizedUsername }); 
+  const user = await User.findOne({ username: sanitizedUsername }).then((user)=> {
+    if (user) {
 
-  if (user) {
-    if (bcrypt.compare(password, user.password)) {
-      const accessToken = jwt.sign(
-        {
-        username: user.username, 
-        role: user.role
-        }, 
-        process.env.JWT_SECRET, 
-        {
-        expiresIn: '24',
+      const validPassword = (bcrypt.compare(sanitizedPassword, user.password)).then((result) => {
+        if (result === true) {
+          const accessToken = jwt.sign(
+            { username: user.username, role: user.role },
+            'super-secret-key-1234',
+            {
+              expiresIn: '24h',
+            }
+          );
+          res
+            .status(200)
+            .send({ success: true, token: accessToken, role: user.role });
+        } else {
+          res.status(401).send({ success: false });
         }
-    ); 
-      res.status(200)
-      .send({ success: true, token: accessToken, role: user.role }); 
+      })
+  
+     
+  
+   
     } else {
-      res.status(400).send({ success: false }); 
+      res.status(401).send({ success: false });
     }
-  } 
-}); 
+  })
+  
 
+ 
+});
+
+// Read all posts
 app.get('/posts', async (req, res) => {
-  const posts = await Post.find(); 
-  res.status(200).send(posts); 
-})
+  const posts = await Post.find();
+  res.status(200).send(posts);
+});
 
 app.post('/posts', authenticateJWT, async (req, res) => {
   if (req.user.role === 'admin') {
-    const { title, content, imageUrl, author, timestamp } = req.body; 
+    const { title, content, imageUrl, author, timestamp } = req.body;
 
     const newPost = new Post({
-      title, 
-      content, 
-      imageUrl, 
-      author, 
-      timestamp
-    }); 
+      title,
+      content,
+      imageUrl,
+      author,
+      timestamp,
+    });
 
     newPost
       .save()
       .then((savedPost) => {
-        res.status(200).send(savedPost); 
+        res.status(201).send(savedPost);
       })
       .catch((error) => {
-        res.status(500).send({ error: 'Internal Server Error' }); 
-      })
+        res.status(500).send({ error: 'Internal Server Error' });
+      });
   } else {
-    res.sendStatus(400); 
+    res.sendStatus(403);
   }
-}); 
+});
 
-app.get('/post/id', async (req, res) => {
-  const postId = req.params.id; 
-  const post = await Post.findById(postId); 
+app.get('/post/:id', async (req, res) => {
+  const postId = req.params.id;
+  const post = await Post.findById(postId);
   if (!post) {
-    return res.status(404).send('Post not found'); 
-  } 
+    return res.status(404).send('Post not found');
+  }
 
+  // Read the HTML template from the file
   fs.readFile(path.join(__dirname, 'post-detail.html'), 'utf8', (err, data) => {
-    if(err) {
-      console.log(err); 
-      return res.status(500).send('Internal Server Error'); 
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Internal Server Error');
     }
 
+    // Replace placeholders in th HTML with actual post data
     const postDetailHtml = data
-    .replace(/\${post.imageUrl}/g, post.imageUrl)
-    .replace(/\${post.title}/g, post.title)
-    .replace(/\${post.author}/g, post.author)
-    .replace(/\${post.content}/g, post.content)
+      .replace(/\${post.imageUrl}/g, post.imageUrl)
+      .replace(/\${post.title}/g, post.title)
+      .replace(/\${post.timestamp}/g, post.timestamp)
+      .replace(/\${post.author}/g, post.author)
+      .replace(/\${post.content}/g, post.content);
 
-    res.status(200).send(postDetailHtml); 
-  }); 
-}); 
+    res.status(200).send(postDetailHtml);
+  });
+});
 
-app.delete('/posts:id', authenticateJWT, async (req, res) => {
-  if (req.user.role === 'admin') {
+// Delete post
+app.delete('/posts/:id', authenticateJWT, async (req, res) => {
+  if (req.user.role == 'admin') {
     try {
-      await Post.findByIdAndDelete(req.params.id); 
-      res.status(200).send({ message: 'Post deleted'}); 
-    } catch(error) {
-      res.status(500).send({ error: 'Internal Server Error' }); 
+      await Post.findByIdAndDelete(req.params.id);
+      res.status(200).send({ message: 'Post deleted' });
+    } catch (error) {
+      res.status(500).send({ error: 'Internal Server Error' });
     }
   } else {
-    res.status(404).send( {error: 'Forbidden'} ); 
+    res.status(403).send({ error: 'Forbidden' });
   }
-})
+});
 
-app.put('/posts:id', authenticateJWT, async (req, res) => {
-  const { title, content } = req.body; 
-  const postId = req.params.id; 
+// Update Post
+app.put('/posts/:id', authenticateJWT, async (req, res) => {
+  const { title, content } = req.body;
+  const postId = req.params.id;
 
   try {
-    const post = await Post.findById(postId); 
+    const post = await Post.findById(postId);
 
     if (!post) {
-      return res.status(404).send({ error: 'Post not found' })
+      return res.status(404).send({ error: 'Post not found' });
     }
 
     if (req.user.role === 'admin') {
-      post.title = title; 
-      post.content = content; 
-      await post.save(); 
-      res.status(200).send(post); 
+      post.title = title;
+      post.content = content;
+      await post.save();
+      res.status(200).send(post);
     } else {
-      res.status(403).send({ error: 'Forbidden' })
+      res.status(403).send({ error: 'Forbidden' });
     }
   } catch (error) {
-    res.status(500).send({ error: 'Internal Server Error' }); 
+    res.status(500).send({ error: 'Internal Server Error' });
   }
-}); 
-
-
-
-
+});

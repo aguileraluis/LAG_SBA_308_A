@@ -13,7 +13,7 @@
 </head>
 <body>
   <nav class="nav">
-    <div class="nav__logo" href="/"><a href="index.html">Luis Aguilera Garcia </a></div>
+    <div class="nav__logo"><a href="/">Luis Aguilera Garcia</a></div>
     <a class="nav__hamburger">
       <span class="nav__hamburger__line"></span>
       <span class="nav__hamburger__line"></span>
@@ -24,52 +24,68 @@
         <div id="register-div">
           <h1>Register</h1>
           <form id="register-form">
-            <input type="text" id="register-username" placeholder="Username"/>
-            <input type="password" id="register-password" placeholder="Password"/>
+            <input
+              type="text"
+              id="register-username"
+              placeholder="Username"
+            />
+            <input
+              type="password"
+              id="register-password"
+              placeholder="Password"
+            />
             <select id="register-role">
               <option value="reader">Reader</option>
-              <option value="reader">Admin</option>
+              <option value="admin">Admin</option>
             </select>
             <button type="submit">Register</button>
           </form>
         </div>
-        <div class="logout-div">
+        <div id="logout-div">
           <h2 id="username">Username</h2>
           <button id="logout-button">Logout</button>
-          <div id="login-div">
-            <h1>Login</h1>
-            <form id="login-form">
-              <input type="text" id="login-username" placeholder="Username"/>
-              <input type="passowrd" id="login-password" placeholder="Password"/>
-            </form>
+        </div>
+
+        <div id="login-div">
+          <h1>Login</h1>
+          <form id="login-form">
+            <input type="text" id="login-username" placeholder="Username" />
+            <input
+              type="password"
+              id="login-password"
+              placeholder="Password"
+            />
             <button id="login-button" type="submit">Login</button>
-          </div>
+          </form>
         </div>
       </div>
     </div>
   </nav>
   <main>
-    <div id="posts-list">
-    
-    <div id="new-post-div" style="display: none;">
+    <div id="posts-list"></div>
+
+    <div id="new-post-div" style="display: none">
       <h2>New Post</h2>
       <form id="new-post-form">
-      <input type="text" id="title" placeholder="Title"/>
-      <textarea id="content" placeholder="Content"></textarea>
-      <input type="text" id="image-url" placeholder="Image URL"/>
-      <button type="submit">Create Post</button>
+        <input type="text" id="title" placeholder="Title" />
+        <textarea id="content" placeholder="Content"></textarea>
+        <input type="text" id="image-url" placeholder="Image URL" />
+        <button type="submit">Create post</button>
       </form>
     </div>
     <div id="post-detail-container"></div>
   </main>
   <footer>
     <h3>Luis Aguilera Garcia</h3>
-    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam sit fugiat maiores aspernatur qui, vero accusamus odio exercitationem. Amet atque eos eligendi porro repudiandae, fugit dolor quae earum natus, facere hic, sapiente quibusdam doloribus voluptatum alias. Aliquid voluptatibus amet rem.</p>
-    <span>
-    <p>&copy;</p>
-    <script>
-      document.write(new Date().getFullYear()); 
-    </script>
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ducimus illum
+      dolorum hic totam et perferendis? Nisi ipsum omnis dolor harum.
+    </p>
+    <span
+      ><p>&copy;</p>
+      <script>
+        document.write(new Date().getFullYear());
+      </script></span
+    >
   </footer>
-</body>
 </html>
