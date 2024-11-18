@@ -15,55 +15,8 @@
   <body>
     <nav class="nav">
       <div class="nav__logo"><a href="/">Luis Aguilera Garcia</a></div>
-      <a class="nav__hamburger">
-        <span class="nav__hamburger__line"></span>
-        <span class="nav__hamburger__line"></span>
-        <span class="nav__hamburger__line"></span>
-      </a>
-      <div class="nav__menu">
-        <div>
-          <div id="register-div">
-            <h1>Register</h1>
-            <form id="register-form">
-              <input
-                type="text"
-                id="register-username"
-                placeholder="Username"
-              />
-              <input
-                type="password"
-                id="register-password"
-                placeholder="Password"
-              />
-              <select id="register-role">
-                <option value="reader">Reader</option>
-                <option value="admin">Admin</option>
-              </select>
-              <button type="submit">Register</button>
-            </form>
-          </div>
-          <div id="logout-div">
-            <h2 id="username">Username</h2>
-            <button id="logout-button">Logout</button>
-          </div>
-
-          <div id="login-div">
-            <h1>Login</h1>
-            <form id="login-form">
-              <input type="text" id="login-username" placeholder="Username" />
-              <input
-                type="password"
-                id="login-password"
-                placeholder="Password"
-              />
-            </form>
-            <button id="login-button" type="submit">Login</button>
-          </div>
-        </div>
-      </div>
     </nav>
     <main>
-      `
       <img src="${post.imageUrl}" class="detail-post-img" />
       <div class="post-content">
         <h1 class="post-title">${post.title}</h1>
@@ -73,10 +26,22 @@
         </div>
         <p>${post.content}</p>
       </div>
+
+      <div id="comments-list"></div>
+
+      <div id="new-comment-div" style="display: none">
+        <h2>Read All Comments</h2>
+        <form id="new-comment-form">
+          <input type="text" id="username" placeholder="Username" />
+          <textarea id="comment" placeholder="Comment"></textarea>
+          <button type="submit">Add comment</button>
+        </form>
+      </div>
+      <div id="comment-detail-container"></div>
+
     </main>
-    `
     <footer>
-      <h3>Nordic Rose</h3>
+      <h3>Luis Aguilera Garcia</h3>
       <p>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ducimus illum
         dolorum hic totam et perferendis? Nisi ipsum omnis dolor harum.

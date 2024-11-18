@@ -1,12 +1,15 @@
 // Client
-
 // Get stored data
 let storedToken = localStorage.getItem('jwtToken');
 let storedUsername = localStorage.getItem('username');
 
 // Set the username in the HTML
 const usernameElement = document.getElementById('username');
-usernameElement.textContent = storedUsername;
+
+if (usernameElement) {
+  usernameElement.textContent = storedUsername;
+
+}
 
 // Load page and event listeners
 document.addEventListener('DOMContentLoaded', () => {
@@ -17,6 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const storedRole = localStorage.getItem('userRole');
     if (storedRole == 'admin') {
       showAdminFeatures();
+    } else if (storedRole == 'reader') {
+      showReaderFeatures(); 
     }
   }
 
@@ -26,12 +31,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const loginForm = document.getElementById('login-form');
-  loginForm.addEventListener('submit', (event) => loginUser(event, baseUrl));
+
+  if (loginForm) {
+    loginForm.addEventListener('submit', (event) => loginUser(event, baseUrl));
+
+  }
 
   const registerForm = document.getElementById('register-form');
-  registerForm.addEventListener('submit', (event) =>
-    registerUser(event, baseUrl)
-  );
+
+  if (registerForm) {
+    registerForm.addEventListener('submit', (event) =>
+      registerUser(event, baseUrl)
+    );
+  }
+  
 });
 
 // Post details
@@ -91,6 +104,16 @@ async function fetchPosts(baseUrl) {
   }
 }
 
+// Fetch all comments
+// async function fetchComments(baseUrl) {
+//   const res = await fetch(`${baseUrl}/comments`); 
+//   const data = await res.json(); 
+//   const commentsList = document.getElementById("comments-list"); 
+//   const isReader = localStorage.getItem('userRole') === 'reader';
+
+// }
+
+// Create Post
 async function createPost(event, baseUrl) {
   event.preventDefault();
   const titleInput = document.getElementById('title');
@@ -148,6 +171,57 @@ async function createPost(event, baseUrl) {
     alert('Create post failed.');
   }
   fetchPosts(baseUrl);
+}
+
+// Create Comment 
+async function createComment(event, baseUrl) {
+  event.preventDefault(); 
+  const commentInput = document.getElementById('comment');
+  
+  const comment = commentInput.value; 
+
+  if (!comment) {
+    alert('Please type your comment.'); 
+    return; 
+  }
+
+  const newComment = {
+    author: storedUsername,
+    comment: comment, 
+    timestamp: new Date().toLocaleDateString(undefined, {
+      weekday: 'long', 
+      year: 'numeric', 
+      mongth: 'long', 
+      day: 'numeric'
+    }),
+  }; 
+
+  const headers = new Headers({
+    'Content-Type': 'application/json', 
+    Authorization: `Bearer ${storedToken}`, 
+  }); 
+
+  const requestOptions = {
+    method: 'POST', 
+    headers: headers, 
+    body: JSON.stringify(newPost),
+  }; 
+
+  try {
+    const response = await fetch(`${baseUrl}/comments`, requestOptions); 
+    if (!response.ok) {
+      const storedRole = localStorage.getItem('userRold'); 
+      console.error(`Error creating the post: HTTP Status ${response.status}`); 
+    } else {
+      comment.value = ''; 
+      alert('Comment added successfully!'); 
+    }
+  } catch(error) {
+    console.error('An error occured during the fetch: ', error); 
+    alert('Add comment failed.'); 
+  }
+
+  fetchComments(baseUrl); 
 }
 
 // Delete Post
@@ -291,6 +365,7 @@ async function loginUser(event, baseUrl) {
     username,
     password,
   };
+  
 
   const res = await fetch(`${baseUrl}/login`, {
     method: 'POST',
@@ -319,6 +394,8 @@ async function loginUser(event, baseUrl) {
 
     if (data.role === 'admin') {
       showAdminFeatures();
+    } else if (data.role == 'reader') {
+      showReaderFeatures(); 
     }
   } else {
     alert('Login failed.');
@@ -340,6 +417,23 @@ function showAdminFeatures() {
   });
 }
 
+// Reader features
+function showReaderFeatures() {
+  const newCommentDiv = document.getElementById('new-comment-div'); 
+
+  if (newCommentDiv) {
+    newCommentDiv.style.display = 'flex'; 
+  }
+
+  const allBtns = document.querySelectorAll('.btn'); 
+
+  allBtns.forEach((btn) => {
+    if (btn) {
+      btn.style.display = 'block'; 
+    }
+  })
+}
+
 // Logout
 document.addEventListener('DOMContentLoaded', () => {
   const baseUrl = window.location.origin;
@@ -359,8 +453,16 @@ document.addEventListener('DOMContentLoaded', () => {
       location.reload();
     });
   } else {
-    registerDiv.style.display = 'flex';
-    loginDiv.style.display = 'flex';
-    logoutDiv.style.display = 'none';
+    if (registerDiv) {
+      registerDiv.style.display = 'flex';
+    }
+    if (loginDiv) {
+      loginDiv.style.display = 'flex';
+    }
+    if (logoutDiv) {
+      logoutDiv.style.display = 'none';
+    }
   }
 });
+
+
