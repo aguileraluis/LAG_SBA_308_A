@@ -65,8 +65,6 @@ body {
   gap: 12px;
 }
 
-/* MEDIA QUERIES */
-
 @media screen and (max-width: 5050px) {
   .nav__hamburger {
     display: flex;
@@ -301,8 +299,6 @@ textarea {
   width: 60%;
   height: 200px;
 }
-
-/* FOOTER */
 
 footer {
   display: flex;

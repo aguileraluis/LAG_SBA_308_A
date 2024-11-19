@@ -20,9 +20,6 @@ const jwtSecret = 'super-secret-key-1234';
 const app = express();
 const PORT = process.env.PORT || 5500;
 
-// mongoDB pw: gfivu7UMpNm7e2t8
-
-// Favicon
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
 app.set('views',path.join(__dirname, 'views')); 
@@ -30,7 +27,6 @@ app.set('view engine', 'pug');
 
 app.use('/', router); 
 
-// Connect to MongoDB
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect('mongodb+srv://luis:gfivu7UMpNm7e2t8@cluster0.bsxnu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
@@ -46,7 +42,6 @@ connectDB().then(() => {
   });
 });
 
-// MongoDB Models
 const Post = mongoose.model(
   'Post',
   new mongoose.Schema({
@@ -76,8 +71,6 @@ const Comment = mongoose.model(
     postId: String
   })
 )
-
-// Middleware
 app.use(cors({ origin: '*' }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname)));
@@ -89,7 +82,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// JWT Authentication Middleware
 const authenticateJWT = (req, res, next) => {
   const token = req.headers.authorization.split(' ')[1];
 
@@ -108,15 +100,12 @@ const authenticateJWT = (req, res, next) => {
   }
 };
 
-// User registration
 app.post('/register', async (req, res) => {
   const { username, password, role } = req.body;
 
-  // Sanitze and validate user input
   const sanitizedUsername = validator.escape(username);
   const sanitizedPassword = validator.escape(password);
 
-  // Ensure valid input data
   if (!sanitizedUsername || !sanitizedPassword) {
     return res.status(400).send({ error: 'Invalid input data' });
   }
@@ -133,15 +122,12 @@ app.post('/register', async (req, res) => {
   res.status(201).send({ success: true });
 });
 
-// User login
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
-  // Sanitze and validate user input
   const sanitizedUsername = validator.escape(username);
   const sanitizedPassword = validator.escape(password);
 
-  // Ensure valid input data
   if (!sanitizedUsername || !sanitizedPassword) {
     return res.status(400).send({ error: 'Invalid input data' });
   }
@@ -165,20 +151,12 @@ app.post('/login', async (req, res) => {
           res.status(401).send({ success: false });
         }
       })
-  
-     
-  
-   
     } else {
       res.status(401).send({ success: false });
     }
   })
-  
-
- 
 });
 
-// Read all posts
 app.get('/posts', async (req, res) => {
   const posts = await Post.find();
   res.status(200).send(posts);
@@ -247,14 +225,11 @@ app.get('/post/:id', async (req, res) => {
     return res.status(404).send('Post not found');
   }
 
-  // Read the HTML template from the file
   fs.readFile(path.join(__dirname, '/views/post-detail.pug'), 'utf8', (err, data) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Internal Server Error');
     }
-
-    // Replace placeholders in th HTML with actual post data
     const postDetailHtml = data
       .replace(/\${post.imageUrl}/g, post.imageUrl)
       .replace(/\${post.title}/g, post.title)
@@ -268,7 +243,6 @@ app.get('/post/:id', async (req, res) => {
   });
 });
 
-// Delete post
 app.delete('/posts/:id', authenticateJWT, async (req, res) => {
   if (req.user.role == 'admin') {
     try {
@@ -282,7 +256,6 @@ app.delete('/posts/:id', authenticateJWT, async (req, res) => {
   }
 });
 
-// Delete comment
 app.delete('/comments/:id', authenticateJWT, async (req, res) => {
   const postId = req.params.id;
   console.log(postId);
@@ -298,7 +271,6 @@ app.delete('/comments/:id', authenticateJWT, async (req, res) => {
   }
 });
 
-// Update Post
 app.put('/posts/:id', authenticateJWT, async (req, res) => {
   const { title, content } = req.body;
   const postId = req.params.id;
@@ -323,7 +295,6 @@ app.put('/posts/:id', authenticateJWT, async (req, res) => {
   }
 });
 
-// Update Comment
 app.put('/comments/:id', authenticateJWT, async (req, res) => {
   const commentId = req.params.id;
 

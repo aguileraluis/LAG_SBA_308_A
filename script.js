@@ -1,16 +1,12 @@
-// Client
-// Get stored data
 let storedToken = localStorage.getItem("jwtToken");
 let storedUsername = localStorage.getItem("username");
 
-// Set the username in the HTML
 const usernameElement = document.getElementById("username");
 
 if (usernameElement) {
   usernameElement.textContent = storedUsername;
 }
 
-// Load page and event listeners
 document.addEventListener("DOMContentLoaded", () => {
   const baseUrl = window.location.origin;
   fetchPosts(baseUrl);
@@ -52,10 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Post details
 const postDetailContainer = document.getElementById("post-detail-container");
 
-// Add a listener for detail page
 window.addEventListener("load", () => {
   const urlParams = new URLSearchParams(window.location.search);
   const postId = urlParams.get("post");
@@ -65,7 +59,6 @@ window.addEventListener("load", () => {
   }
 });
 
-// Fetch posts
 async function fetchPosts(baseUrl) {
   const res = await fetch(`${baseUrl}/posts`);
   const data = await res.json();
@@ -115,7 +108,6 @@ async function fetchPosts(baseUrl) {
   fetchComments(baseUrl);
 }
 
-// Fetch comments
 async function fetchComments(baseUrl) {
   const res = await fetch(`${baseUrl}/comments`);
   const data = await res.json();
@@ -171,39 +163,27 @@ async function fetchComments(baseUrl) {
   }
 }
 
-// Fetch all comments
-// async function fetchComments(baseUrl) {
-//   const res = await fetch(`${baseUrl}/comments`);
-//   const data = await res.json();
-//   const commentsList = document.getElementById("comments-list");
-//   const isReader = localStorage.getItem('userRole') === 'reader';
-
-// }
-
 function escapeSpecialChars(str) {
   str = str.toString();
   return str
-    .replace(/\\/g, "\\\\") // Escape backslashes
-    .replace(/"/g, '\\"') // Escape double quotes
-    .replace(/'/g, "\\'") // Escape single quotes
-    .replace(/\(/g, "\\(") // Escape parentheses
-    .replace(/\)/g, "\\)") // Escape parentheses
-    .replace(/,/g, "\\,"); // Escape commas
+    .replace(/\\/g, "\\\\") 
+    .replace(/"/g, '\\"') 
+    .replace(/'/g, "\\'") 
+    .replace(/\(/g, "\\(") 
+    .replace(/\)/g, "\\)") 
+    .replace(/,/g, "\\,"); 
 }
 
-// Create Post
 async function createPost(event, baseUrl) {
   event.preventDefault();
   const titleInput = document.getElementById("title");
   const contentInput = document.getElementById("content");
   const imageUrlInput = document.getElementById("image-url");
 
-  // Get the values from the input fields
   const title = titleInput.value;
   const content = contentInput.value;
   const imageUrl = imageUrlInput.value;
 
-  // Ensure that inputs are not empty
   if (!title || !content || !imageUrl) {
     alert("Please fill in all fields 1.");
     return;
@@ -238,7 +218,6 @@ async function createPost(event, baseUrl) {
       const storedRole = localStorage.getItem("userRole");
       console.error(`Error creating the post: HTTP Status ${response.status}`);
     } else {
-      // Clear the input data
       titleInput.value = "";
       contentInput.value = "";
       imageUrlInput.value = "";
@@ -251,7 +230,6 @@ async function createPost(event, baseUrl) {
   fetchPosts(baseUrl);
 }
 
-// Create Comment
 async function createComment(event, baseUrl) {
   event.preventDefault();
   const isReader = localStorage.getItem("userRole") === "reader";
@@ -313,7 +291,6 @@ async function createComment(event, baseUrl) {
   fetchComments(baseUrl);
 }
 
-// Delete Post
 async function deletePost(postId, baseUrl) {
   const deleteUrl = `${baseUrl}/posts/${postId}`;
   try {
@@ -336,7 +313,6 @@ async function deletePost(postId, baseUrl) {
   }
 }
 
-// Delete Comment
 async function deleteComment(postId, baseUrl) {
   console.log(baseUrl); 
   console.log(postId); 
@@ -361,7 +337,6 @@ async function deleteComment(postId, baseUrl) {
   }
 }
 
-// Update form
 function showUpdateForm(postId, title, content, imageUrl) {
   const updateForm = `
     <form id="update-form">
@@ -373,7 +348,6 @@ function showUpdateForm(postId, title, content, imageUrl) {
     `;
 
   const postElement = document.getElementById(postId);
-  // postElement.innerHTML += updateForm;
 
   const length = postElement.children.length;
   console.log(length);
@@ -398,7 +372,6 @@ function showUpdateCommentForm(postId, comment) {
     `;
 
   const postElement = document.getElementById("update-div");
-  // postElement.innerHTML += updateForm;
 
   postElement.innerHTML += updateForm;
 
@@ -408,14 +381,12 @@ function showUpdateCommentForm(postId, comment) {
   }
 }
 
-// Update post
 async function updatePost(event, postId) {
   event.preventDefault();
   const title = document.getElementById("update-title").value;
   const content = document.getElementById("update-message").value;
   const baseUrl = window.location.origin;
 
-  // ensure that inputs are not empty
   if (!title || !content) {
     alert("Please fill in all fields 2.");
     return;
@@ -454,7 +425,6 @@ async function updateComment(event, postId) {
   const updateDiv = document.getElementById("update-form");
   const baseUrl = window.location.origin;
 
-  // ensure that inputs are not empty
   if (!message) {
     alert("Please fill in all fields 2.");
     return;
@@ -491,7 +461,6 @@ async function updateComment(event, postId) {
   }
 }
 
-// Register user
 async function registerUser(event, baseUrl) {
   event.preventDefault();
   const usernameInput = document.getElementById("register-username");
@@ -502,7 +471,6 @@ async function registerUser(event, baseUrl) {
   const password = passwordInput.value;
   const role = roleInput.value;
 
-  // ensure that inputs are not empty
   if (!username || !password || !role) {
     alert("Please fill in all fields 3.");
     return;
@@ -526,7 +494,6 @@ async function registerUser(event, baseUrl) {
 
   if (data.success) {
     alert("Registered successful!");
-    // Clear input fields
     usernameInput.value = "";
     passwordInput.value = "";
     roleInput.value = "";
@@ -535,7 +502,6 @@ async function registerUser(event, baseUrl) {
   }
 }
 
-// Loging user
 async function loginUser(event, baseUrl) {
   event.preventDefault();
   const usernameInput = document.getElementById("login-username");
@@ -573,11 +539,9 @@ async function loginUser(event, baseUrl) {
     localStorage.setItem("userRole", data.role);
     localStorage.setItem("username", username);
 
-    // Close the hamburge menu if open
     linksContainer.classList.toggle("active");
     hamburger.classList.toggle("active");
 
-    // Clear input fields
     usernameInput.value = "";
     passwordInput.value = "";
 
@@ -593,7 +557,6 @@ async function loginUser(event, baseUrl) {
   }
 }
 
-// Admin features
 function showAdminFeatures() {
   const newPostDiv = document.getElementById("new-post-div");
   const newCommentDiv = document.getElementById("new-comment-div"); 
@@ -624,7 +587,6 @@ function showAdminFeatures() {
   });
 }
 
-// Reader features
 function showReaderFeatures() {
   const newCommentDiv = document.getElementById("new-comment-div"); 
   const signIn = document.getElementById("signInMessage"); 
@@ -644,7 +606,6 @@ function showReaderFeatures() {
   });
 }
 
-// Logout
 document.addEventListener("DOMContentLoaded", () => {
   const baseUrl = window.location.origin;
   const registerDiv = document.getElementById("register-div");
