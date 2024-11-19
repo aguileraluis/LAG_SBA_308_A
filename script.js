@@ -120,8 +120,6 @@ async function fetchComments(baseUrl) {
   const res = await fetch(`${baseUrl}/comments`);
   const data = await res.json();
   const commentsList = document.getElementById("comments-list");
-  const isReader = localStorage.getItem("userRole") === "reader";
-  const isAdmin = localStorage.getItem("userRole") == "admin";
   let storedUsername = localStorage.getItem("username");
   let url = window.location.pathname.split("/").pop();
 
@@ -256,6 +254,14 @@ async function createPost(event, baseUrl) {
 // Create Comment
 async function createComment(event, baseUrl) {
   event.preventDefault();
+  const isReader = localStorage.getItem("userRole") === "reader";
+  const isAdmin = localStorage.getItem("userRole") == "admin";
+
+  if (isReader || isAdmin) {
+    console.log('yes'); 
+  } else {
+    console.log('no') 
+  }
   const commentInput = document.getElementById("comment");
   const url = window.location;
   let postId = url.pathname.split("/").pop();
@@ -330,9 +336,11 @@ async function deletePost(postId, baseUrl) {
   }
 }
 
-// Delete Post
-async function deletePost(postId, baseUrl) {
-  const deleteUrl = `${baseUrl}/posts/${postId}`;
+// Delete Comment
+async function deleteComment(postId, baseUrl) {
+  console.log(baseUrl); 
+  console.log(postId); 
+  const deleteUrl = `${baseUrl}/comments/${postId}`;
   try {
     const response = await fetch(deleteUrl, {
       method: "DELETE",
@@ -342,10 +350,10 @@ async function deletePost(postId, baseUrl) {
     });
 
     if (response.ok) {
-      alert("Delete post successful!");
-      fetchPosts(baseUrl);
+      alert("Delete comment successful!");
+      fetchComments(baseUrl);
     } else {
-      alert("Delete post failed.");
+      alert("Delete comment failed.");
     }
   } catch (error) {
     console.error(`Error while deleting post: ${error}`);
@@ -358,7 +366,7 @@ function showUpdateForm(postId, title, content, imageUrl) {
   const updateForm = `
     <form id="update-form">
         <input type="text" id="update-title" value="${title}" />
-        <textarea id="update-message">${message}</textarea>
+        <textarea id="update-message">${content}</textarea>
         <input type="text" id="update-image" value="${imageUrl}" />
         <button type="submit">Update post</button>
     </form>
@@ -404,7 +412,7 @@ function showUpdateCommentForm(postId, comment) {
 async function updatePost(event, postId) {
   event.preventDefault();
   const title = document.getElementById("update-title").value;
-  const content = document.getElementById("update-content").value;
+  const content = document.getElementById("update-message").value;
   const baseUrl = window.location.origin;
 
   // ensure that inputs are not empty
@@ -556,6 +564,8 @@ async function loginUser(event, baseUrl) {
   const data = await res.json();
 
   if (data.success) {
+    let comments = document.getElementById('new-comment-div'); 
+    comments.style.display = 'flex'; 
     localStorage.setItem("jwtToken", data.token);
     localStorage.setItem("userRole", data.role);
     localStorage.setItem("username", username);
@@ -583,8 +593,19 @@ async function loginUser(event, baseUrl) {
 // Admin features
 function showAdminFeatures() {
   const newPostDiv = document.getElementById("new-post-div");
-  if (newPostDiv) {
-    newPostDiv.style.display = "flex";
+  const newCommentDiv = document.getElementById("new-comment-div"); 
+  const signIn = document.getElementById("signInMessage"); 
+
+  if (newCommentDiv) {
+    newCommentDiv.style.display = "flex"; 
+    if (newPostDiv) {
+      newPostDiv.style.display = "flex";
+
+    }
+    if (signIn) {
+      signIn.style.display = "none"; 
+    }
+
   }
 
   const allBtns = document.querySelectorAll(".btn");
@@ -597,12 +618,15 @@ function showAdminFeatures() {
 
 // Reader features
 function showReaderFeatures() {
-  const newCommentDiv = document.getElementById("new-comment-div");
+  const newCommentDiv = document.getElementById("new-comment-div"); 
+  const signIn = document.getElementById("signInMessage"); 
+  if (newPostDiv || newCommentDiv) {
+    newPostDiv.style.display = "flex";
+    if(signIn) {
+      signIn.style.display = "none"; 
 
-  if (newCommentDiv) {
-    newCommentDiv.style.display = "flex";
+    }
   }
-
   const allBtns = document.querySelectorAll(".btn");
 
   allBtns.forEach((btn) => {

@@ -266,6 +266,22 @@ app.delete('/posts/:id', authenticateJWT, async (req, res) => {
   }
 });
 
+// Delete comment
+app.delete('/comments/:id', authenticateJWT, async (req, res) => {
+  const postId = req.params.id;
+  console.log(postId);
+  if (req.user.role == 'admin' || req.user.role == 'reader') {
+    try {
+      await Comment.findByIdAndDelete(postId);
+      res.status(200).send({ message: 'Comment deleted' });
+    } catch (error) {
+      res.status(500).send({ error: 'Internal Server Error' });
+    }
+  } else {
+    res.status(403).send({ error: 'Forbidden' });
+  }
+});
+
 // Update Post
 app.put('/posts/:id', authenticateJWT, async (req, res) => {
   const { title, content } = req.body;
