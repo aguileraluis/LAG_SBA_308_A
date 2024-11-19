@@ -4,20 +4,20 @@ An application built with views, routes, third party middleware and RESTful prac
 
 ## User Stories
 
-The user can register for an account as an admin or a reader
-The user can log into the application
-As an admin:
-The user can view blog posts
-The user can view individual blog posts
-The user can create a blog post
-The user can update a blog post
-The user can delete a blog post
-The user can logout
-As a reader:
-The user can comment on another blog post
-The user can edit that comment on another blog post
-The user can delete that comment on another blog post
-The user can logout
+# The user can register for an account as an admin or a reader
+# The user can log into the application
+# As an admin:
+# The user can view blog posts
+# The user can view individual blog posts
+# The user can create a blog post
+# The user can update a blog post
+# The user can delete a blog post
+# The user can logout
+# As a reader:
+# The user can comment on another blog post
+# The user can edit that comment on another blog post
+# The user can delete that comment on another blog post
+# The user can logout
 
 ## Getting Started
 
