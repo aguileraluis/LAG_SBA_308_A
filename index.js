@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const favicon = require('serve-favicon');
@@ -11,14 +10,23 @@ const validator = require('validator');
 const fs = require('fs');
 const router = require('./router/routes.js');
 const pug = require('pug');
+const jwtSecret = 'super-secret-key-1234';
+const app = express();
+const PORT = process.env.PORT || 5500;
+require('dotenv').config({ path: "./config.env" });
+
+
+app.use(cors({ origin: '*' }));
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname)));
+app.use(express.urlencoded({extended: true})); 
+app.use(express.json()); 
+app.use(bodyParser.json()); 
+
 
 router.get('/', function(req, res) {
   res.render('index', {}); 
 })
-
-const jwtSecret = 'super-secret-key-1234';
-const app = express();
-const PORT = process.env.PORT || 5500;
 
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
@@ -71,15 +79,9 @@ const Comment = mongoose.model(
     postId: String
   })
 )
-app.use(cors({ origin: '*' }));
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname)));
-app.use(express.urlencoded({extended: true})); 
-app.use(express.json()); 
-app.use(bodyParser.json()); 
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, 'index'));
 });
 
 const authenticateJWT = (req, res, next) => {
