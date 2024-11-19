@@ -9,6 +9,12 @@ const path = require('path');
 const mongoose = require('mongoose');
 const validator = require('validator');
 const fs = require('fs');
+const router = require('./router/routes.js');
+const pug = require('pug');
+
+router.get('/', function(req, res) {
+  res.render('index', {}); 
+})
 
 const jwtSecret = 'super-secret-key-1234';
 const app = express();
@@ -18,6 +24,11 @@ const PORT = process.env.PORT || 5500;
 
 // Favicon
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+
+app.set('views',path.join(__dirname, 'views')); 
+app.set('view engine', 'pug'); 
+
+app.use('/', router); 
 
 // Connect to MongoDB
 const connectDB = async () => {
@@ -70,6 +81,9 @@ const Comment = mongoose.model(
 app.use(cors({ origin: '*' }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname)));
+app.use(express.urlencoded({extended: true})); 
+app.use(express.json()); 
+app.use(bodyParser.json()); 
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -234,7 +248,7 @@ app.get('/post/:id', async (req, res) => {
   }
 
   // Read the HTML template from the file
-  fs.readFile(path.join(__dirname, 'post-detail.html'), 'utf8', (err, data) => {
+  fs.readFile(path.join(__dirname, '/views/post-detail.pug'), 'utf8', (err, data) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Internal Server Error');
@@ -248,7 +262,9 @@ app.get('/post/:id', async (req, res) => {
       .replace(/\${post.author}/g, post.author)
       .replace(/\${post.content}/g, post.content);
 
-    res.status(200).send(postDetailHtml);
+      const html = pug.render(postDetailHtml, {}); 
+
+      res.send(html); 
   });
 });
 

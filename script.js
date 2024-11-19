@@ -565,7 +565,10 @@ async function loginUser(event, baseUrl) {
 
   if (data.success) {
     let comments = document.getElementById('new-comment-div'); 
-    comments.style.display = 'flex'; 
+    if (comments) {
+      comments.style.display = 'flex'; 
+
+    }
     localStorage.setItem("jwtToken", data.token);
     localStorage.setItem("userRole", data.role);
     localStorage.setItem("username", username);
@@ -598,15 +601,20 @@ function showAdminFeatures() {
 
   if (newCommentDiv) {
     newCommentDiv.style.display = "flex"; 
+  }
+
     if (newPostDiv) {
       newPostDiv.style.display = "flex";
-
     }
+
     if (signIn) {
       signIn.style.display = "none"; 
-    }
+      
+      if (newPostDiv) {
+        newPostDiv.style.display = "flex"; 
 
-  }
+      }
+    }
 
   const allBtns = document.querySelectorAll(".btn");
   allBtns.forEach((btn) => {
