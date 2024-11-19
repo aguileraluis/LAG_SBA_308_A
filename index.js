@@ -14,13 +14,15 @@ const jwtSecret = 'super-secret-key-1234';
 const app = express();
 const PORT = process.env.PORT || 5500;
 
+// mongoDB pw: gfivu7UMpNm7e2t8
+
 // Favicon
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
 // Connect to MongoDB
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect('mongodb+srv://luis:gt9HYW8kE2sZ9Z3m@cluster0.ge5ew.mongodb.net/', {
+    const conn = await mongoose.connect('mongodb+srv://luis:gfivu7UMpNm7e2t8@cluster0.bsxnu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -53,6 +55,16 @@ const User = mongoose.model(
     role: String,
   })
 );
+
+const Comment = mongoose.model(
+  'Comment', 
+  new mongoose.Schema({
+    author: String, 
+    comment: String, 
+    timestamp: String, 
+    postId: String
+  })
+)
 
 // Middleware
 app.use(cors({ origin: '*' }));
@@ -158,6 +170,11 @@ app.get('/posts', async (req, res) => {
   res.status(200).send(posts);
 });
 
+app.get('/comments', async (req, res) => {
+  const comments = await Comment.find(); 
+  res.status(200).send(comments); 
+})
+
 app.post('/posts', authenticateJWT, async (req, res) => {
   if (req.user.role === 'admin') {
     const { title, content, imageUrl, author, timestamp } = req.body;
@@ -182,6 +199,32 @@ app.post('/posts', authenticateJWT, async (req, res) => {
     res.sendStatus(403);
   }
 });
+
+app.post('/comments', authenticateJWT, async (req, res) => {
+  if (req.user.role == 'reader' || req.user.role == 'admin') {
+    const { author, comment, timestamp, postId } = req.body; 
+
+    console.log(author, comment, timestamp, postId); 
+
+    const newComment = new Comment({
+      author, 
+      comment, 
+      timestamp, 
+      postId
+    }); 
+
+    newComment
+      .save()
+      .then((savedComment) => {
+        res.status(201).send(savedComment); 
+      })
+      .catch((error) => {
+        res.status(500).send({ error: 'Internal Server Error' }); 
+      }); 
+  } else {
+    res.sendStatus(403); 
+  }
+})
 
 app.get('/post/:id', async (req, res) => {
   const postId = req.params.id;
@@ -240,6 +283,32 @@ app.put('/posts/:id', authenticateJWT, async (req, res) => {
       post.content = content;
       await post.save();
       res.status(200).send(post);
+    } else {
+      res.status(403).send({ error: 'Forbidden' });
+    }
+  } catch (error) {
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+});
+
+// Update Comment
+app.put('/comments/:id', authenticateJWT, async (req, res) => {
+  const commentId = req.params.id;
+
+  try {
+    const comment = await Comment.findById(commentId);
+    console.log(comment); 
+
+    if (!comment) {
+      return res.status(404).send({ error: 'Post not found' });
+    }
+
+    if (req.user.role === 'admin' || req.user.role === 'reader') {
+      const { message } = req.body;
+      console.log(message); 
+      comment.comment = message;
+      await comment.save();
+      res.status(200).send(comment);
     } else {
       res.status(403).send({ error: 'Forbidden' });
     }

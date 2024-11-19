@@ -19,21 +19,24 @@
     <main>
       <img src="${post.imageUrl}" class="detail-post-img" />
       <div class="post-content">
-        <h1 class="post-title">${post.title}</h1>
         <div class="extra-info">
+          <h1 class="post-title">${post.title}</h1>
           <p class="post-timestamp">${post.timestamp}</p>
           <p class="post-author">${post.author}</p>
         </div>
         <p>${post.content}</p>
       </div>
+      <hr>
 
-      <div id="comments-list"></div>
-
-      <div id="new-comment-div" style="display: none">
+      <div id="new-comment-div">
         <h2>Read All Comments</h2>
+        
+      <div id="comments-list">
+      </div>
+  
         <form id="new-comment-form">
-          <input type="text" id="username" placeholder="Username" />
-          <textarea id="comment" placeholder="Comment"></textarea>
+          <h5>Add a comment below</h5>
+          <textarea style="border: 1px solid black; border-radius: 2%;" id="comment" placeholder="Comment"></textarea>
           <button type="submit">Add comment</button>
         </form>
       </div>
